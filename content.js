@@ -67,40 +67,29 @@ const createRequestBody = (prompt) => {
 
 // Mutation observer
 const observer = new MutationObserver(() => {
-  const commentBoxes = document.getElementsByClassName("comments-comment-texteditor");
-  if (commentBoxes.length > 0) {
-    Array.from(commentBoxes).forEach(commentBox => {
-      if (!commentBox.hasAttribute("data-mutated")) {
-        commentBox.setAttribute("data-mutated", "true");
+  Array.from(document.getElementsByClassName("comments-comment-texteditor"))
+    .filter(commentBox => !commentBox.hasAttribute("data-mutated"))
+    .forEach(commentBox => {
+      commentBox.setAttribute("data-mutated", "true");
 
-        const article = commentBox.closest(".feed-shared-update-v2");
-        const author = article.querySelector(
-          ".update-components-actor__name .visually-hidden"
-        ).innerText;
-        const post = article.querySelector(
-          ".feed-shared-inline-show-more-text"
-        ).innerText;
+      const article = commentBox.closest(".feed-shared-update-v2");
+      const author = article.querySelector(".update-components-actor__name .visually-hidden")?.innerText;
+      const post = article.querySelector(".feed-shared-inline-show-more-text")?.innerText;
 
-        let prompt = `${author}" wrote: ${post}`;
+      let prompt = `${author}" wrote: ${post}`;
 
-        const commentElement = commentBox.closest(".comments-comment-item");
-        if (commentElement) {
-          // Reply to comment
-          const commentAuthor = commentElement.querySelector(
-            ".comments-post-meta__name-text .visually-hidden"
-          ).innerText;
-          const commentText = commentElement.querySelector(
-            ".comments-comment-item__main-content"
-          ).innerText;
-          prompt += `\n${commentAuthor} replied: ${commentText}\nPlease write a reply to the reply with a maximum of 20 words.`;
-        } else {
-          prompt += `\nPlease write a reply to this post with a maximum of 40 words.`;
-        }
+      const commentElement = commentBox.closest(".comments-comment-item");
+      const commentAuthor = commentElement?.querySelector(".comments-post-meta__name-text .visually-hidden")?.innerText;
+      const commentText = commentElement?.querySelector(".comments-comment-item__main-content")?.innerText;
 
-        createButton(commentBox, prompt);
+      if (commentElement) {
+        prompt += `\n${commentAuthor} replied: ${commentText}\nPlease write a reply to the reply with a maximum of 20 words.`;
+      } else {
+        prompt += `\nPlease write a reply to this post with a maximum of 40 words.`;
       }
+
+      createButton(commentBox, prompt);
     });
-  }
 });
 
 const config = { childList: true, subtree: true };
