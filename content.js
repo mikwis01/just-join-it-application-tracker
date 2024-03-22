@@ -71,7 +71,7 @@ const fetchSuggestion = async (prompt) => {
 
 const createPrompt = (commentBox) => {
   // Get post details
-  const post = commentBox.closest(".feed-shared-update-v2");
+  const post = commentBox.closest(".feed-shared-update-v2") || commentBox.closest(".reusable-search__result-container");
   const author = post.querySelector(".update-components-actor__name .visually-hidden")?.innerText;
   const text = post.querySelector(".feed-shared-inline-show-more-text")?.innerText;
 
