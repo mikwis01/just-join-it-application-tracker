@@ -22,7 +22,7 @@ const observer = new MutationObserver(() => {
 observer.observe(document.body, { childList: true, subtree: true });
 
 const addSuggestionButton = (commentBox) => {
-  const button = document.createElement("div");
+  const button = document.createElement("button");
   button.classList.add(
     "artdeco-button",
     "artdeco-button--muted",
