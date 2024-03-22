@@ -10,7 +10,34 @@ const _apiKey = async () => {
   });
 };
 
-// Function to handle user action
+const observer = new MutationObserver(() => {
+  Array.from(document.getElementsByClassName("comments-comment-texteditor"))
+    .filter(commentBox => !commentBox.hasAttribute("data-mutated"))
+    .forEach(commentBox => {
+      commentBox.setAttribute("data-mutated", "true");
+      addSuggestionButton(commentBox, createPrompt(commentBox));
+    });
+});
+
+observer.observe(document.body, { childList: true, subtree: true });
+
+const addSuggestionButton = (commentBox, prompt) => {
+  const button = document.createElement("div");
+  button.classList.add(
+    "artdeco-button",
+    "artdeco-button--muted",
+    "artdeco-button--tertiary",
+    "artdeco-button--circle"
+  );
+  button.innerHTML =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightbulb-fill" viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a2 2 0 0 0-.453-.618A5.98 5.98 0 0 1 2 6m3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5"/></svg>';
+  button.addEventListener("click", async () => {
+    const suggestion = await fetchSuggestion(prompt)
+    commentBox.querySelector(".ql-editor").innerHTML = `<p>${suggestion}</p>`;
+  });
+  commentBox.querySelector(".mlA").prepend(button);
+};
+
 const fetchSuggestion = async (prompt) => {
   const apiKey = await _apiKey();
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -42,52 +69,24 @@ const fetchSuggestion = async (prompt) => {
   return (await response.json()).choices[0].message.content.trim();
 };
 
-// Function to create new element
-const addSuggestionButton = (commentBox, prompt) => {
-  const button = document.createElement("div");
-  button.classList.add(
-    "artdeco-button",
-    "artdeco-button--muted",
-    "artdeco-button--tertiary",
-    "artdeco-button--circle"
-  );
-  button.innerHTML =
-    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightbulb-fill" viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a2 2 0 0 0-.453-.618A5.98 5.98 0 0 1 2 6m3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5"/></svg>';
-  button.addEventListener("click", async () => {
-    const suggestion = await fetchSuggestion(prompt)
-    commentBox.querySelector(".ql-editor").innerHTML = `<p>${suggestion}</p>`;
-  });
-  commentBox.querySelector(".mlA").prepend(button);
+const createPrompt = (commentBox) => {
+  // Get post details
+  const post = commentBox.closest(".feed-shared-update-v2");
+  const author = post.querySelector(".update-components-actor__name .visually-hidden")?.innerText;
+  const text = post.querySelector(".feed-shared-inline-show-more-text")?.innerText;
+
+  let prompt = `${author}" wrote: ${text}`;
+
+  // Optional: Get comment details
+  const commentElement = commentBox.closest(".comments-comment-item");
+  const commentAuthor = commentElement?.querySelector(".comments-post-meta__name-text .visually-hidden")?.innerText;
+  const commentText = commentElement?.querySelector(".comments-comment-item__main-content")?.innerText;
+
+  if (commentElement) {
+    prompt += `\n${commentAuthor} replied: ${commentText}\nPlease write a reply to the reply with a maximum of 20 words.`;
+  } else {
+    prompt += `\nPlease write a reply to this post with a maximum of 40 words.`;
+  }
+
+  return prompt;
 };
-
-
-// Mutation observer
-const observer = new MutationObserver(() => {
-  Array.from(document.getElementsByClassName("comments-comment-texteditor"))
-    .filter(commentBox => !commentBox.hasAttribute("data-mutated"))
-    .forEach(commentBox => {
-      commentBox.setAttribute("data-mutated", "true");
-
-      // Get post details
-      const post = commentBox.closest(".feed-shared-update-v2");
-      const author = post.querySelector(".update-components-actor__name .visually-hidden")?.innerText;
-      const text = post.querySelector(".feed-shared-inline-show-more-text")?.innerText;
-
-      let prompt = `${author}" wrote: ${text}`;
-
-      // Optional: Get comment details
-      const commentElement = commentBox.closest(".comments-comment-item");
-      const commentAuthor = commentElement?.querySelector(".comments-post-meta__name-text .visually-hidden")?.innerText;
-      const commentText = commentElement?.querySelector(".comments-comment-item__main-content")?.innerText;
-
-      if (commentElement) {
-        prompt += `\n${commentAuthor} replied: ${commentText}\nPlease write a reply to the reply with a maximum of 20 words.`;
-      } else {
-        prompt += `\nPlease write a reply to this post with a maximum of 40 words.`;
-      }
-
-      addSuggestionButton(commentBox, prompt);
-    });
-});
-
-observer.observe(document.body, { childList: true, subtree: true });
