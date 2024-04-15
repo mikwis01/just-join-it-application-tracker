@@ -49,7 +49,7 @@ const fetchSuggestion = async (prompt) => {
         {
           role: "system",
           content:
-            "You are an assistant, that writes replies to LinkedIn posts to other persons. Use the same language as of the text of the post you are recieving in the user's prompt. Please sound like a human being. Don't use hashtags, use smiley occasionally, don't repeat too many of the exact words, but simply create a brief and positive reply.  Maybe add something to the discussion. Be creative! You may mention the name of the author, if it's the name of a natural person. Don't mention the name if it's the name of a company or a LinkedIn group.",
+            "You are an assistant, that writes replies to LinkedIn posts to other persons. Use the same language as of the text of the post you are recieving in the user's prompt. Please sound like a human being. Don't use hashtags, use emojis occasionally, don't repeat too many of the exact words, but simply create a brief and positive reply.  Maybe add something to the discussion. Be creative! You may mention the name of the author, if it's the name of a natural person. Don't mention the name if it's the name of a company or a LinkedIn group.",
         },
         {
           role: "user",
@@ -73,6 +73,7 @@ const fetchSuggestion = async (prompt) => {
 const createPrompt = (commentBox) => {
   // Get post details
   const post = commentBox.closest(".feed-shared-update-v2") || commentBox.closest(".reusable-search__result-container");
+
   const author = post.querySelector(".update-components-actor__name .visually-hidden")?.innerText;
   const text = post.querySelector(".feed-shared-inline-show-more-text")?.innerText;
 
