@@ -1,10 +1,10 @@
 // Load apiKey from chrome storage
-let apiKey = "";
 const _apiKey = async () => {
-  if (apiKey) return apiKey;
   return new Promise((resolve) => {
     chrome.storage.sync.get("apiKey", (data) => {
-      apiKey = data.apiKey;
+      if(!data.apiKey) {
+        alert("Please set your OpenAI API key in the extension options.");
+      }
       resolve(data.apiKey);
     });
   });
@@ -41,6 +41,9 @@ const addSuggestionButton = (commentBox) => {
 
 const fetchSuggestion = async (prompt) => {
   const apiKey = await _apiKey();
+  if(!apiKey) {
+    return "";
+  }
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     body: JSON.stringify({
