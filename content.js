@@ -2,7 +2,7 @@
 const _apiKey = async () => {
   return new Promise((resolve) => {
     chrome.storage.sync.get("apiKey", (data) => {
-      if(!data.apiKey) {
+      if (!data.apiKey) {
         alert("Please set your OpenAI API key in the extension options.");
       }
       resolve(data.apiKey);
@@ -12,8 +12,8 @@ const _apiKey = async () => {
 
 const observer = new MutationObserver(() => {
   Array.from(document.getElementsByClassName("comments-comment-texteditor"))
-    .filter(commentBox => !commentBox.hasAttribute("data-mutated"))
-    .forEach(commentBox => {
+    .filter((commentBox) => !commentBox.hasAttribute("data-mutated"))
+    .forEach((commentBox) => {
       commentBox.setAttribute("data-mutated", "true");
       addSuggestionButton(commentBox);
     });
@@ -36,12 +36,22 @@ const addSuggestionButton = (commentBox) => {
     const suggestion = await fetchSuggestion(createPrompt(commentBox));
     commentBox.querySelector(".ql-editor").innerHTML = `<p>${suggestion}</p>`;
   });
-  commentBox.querySelector(".mlA").prepend(button);
+  const editorDiv = commentBox.querySelector(
+    ".comments-comment-box-comment__text-editor"
+  );
+  if (
+    editorDiv &&
+    editorDiv.nextElementSibling &&
+    editorDiv.nextElementSibling.firstElementChild
+  ) {
+    const firstChildDiv = editorDiv.nextElementSibling.firstElementChild;
+    firstChildDiv.insertBefore(button, firstChildDiv.firstChild);
+  }
 };
 
 const fetchSuggestion = async (prompt) => {
   const apiKey = await _apiKey();
-  if(!apiKey) {
+  if (!apiKey) {
     return "";
   }
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -75,17 +85,27 @@ const fetchSuggestion = async (prompt) => {
 
 const createPrompt = (commentBox) => {
   // Get post details
-  const post = commentBox.closest(".feed-shared-update-v2") || commentBox.closest(".reusable-search__result-container");
+  const post =
+    commentBox.closest(".feed-shared-update-v2") ||
+    commentBox.closest(".reusable-search__result-container");
 
-  const author = post.querySelector(".update-components-actor__name .visually-hidden")?.innerText;
-  const text = post.querySelector(".feed-shared-inline-show-more-text")?.innerText;
+  const author = post.querySelector(
+    ".update-components-actor__name .visually-hidden"
+  )?.innerText;
+  const text = post.querySelector(
+    ".feed-shared-inline-show-more-text"
+  )?.innerText;
 
   let prompt = `${author}" wrote: ${text}`;
 
   // Optional: Get comment details
   const commentElement = commentBox.closest(".comments-comment-item");
-  const commentAuthor = commentElement?.querySelector(".comments-post-meta__name-text .visually-hidden")?.innerText;
-  const commentText = commentElement?.querySelector(".comments-comment-item__main-content")?.innerText;
+  const commentAuthor = commentElement?.querySelector(
+    ".comments-post-meta__name-text .visually-hidden"
+  )?.innerText;
+  const commentText = commentElement?.querySelector(
+    ".comments-comment-item__main-content"
+  )?.innerText;
 
   if (commentElement) {
     prompt += `\n${commentAuthor} replied: ${commentText}\nPlease write a reply to the reply with a maximum of 20 words.`;
