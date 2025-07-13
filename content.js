@@ -1,4 +1,4 @@
-;(() => {
+(() => {
 	const GOOGLE_SHEET_WEBHOOK = ''
 
 	const getOfferData = () => {
