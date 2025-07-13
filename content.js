@@ -1,5 +1,5 @@
 ;(() => {
-	const GOOGLE_SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbzoxyE76VMURueWAjHY7lylCTx85UP0eRvhgAToU0h2EGeN4eMOnx7x8LmzUAOV7XU4mA/exec'
+	const GOOGLE_SHEET_WEBHOOK = ''
 
 	const getOfferData = () => {
 		const jobTitle = document.querySelectorAll('h1')[0].textContent
