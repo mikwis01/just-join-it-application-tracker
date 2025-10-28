@@ -4,10 +4,6 @@
 	"description": "Copies job application data from Just Join IT to Google Sheets for tracking purposes.",
 	"version": "1.0.0",
 	"permissions": ["activeTab", "scripting"],
-	"action": {
-		"default_icon": "icon.png"
-	},
-	"background": {
-		"service_worker": "background.js"
-	}
+	"action": { "default_icon": "icon.png" },
+	"background": { "service_worker": "background.js" }
 }
